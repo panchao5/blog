@@ -8,7 +8,7 @@ JSX 是 React 推荐使用的一种用于描述 UI 的语法。在经过 babel �
 
 在有了以上基础之后，我们回到文章的标题。对于使用了 Virtual DOM 技术的库来说，增强 JSX 其实就是增强创建 VDOM 节点的函数。由于创建 Virtual DOM 节点的函数一般被命名为`h`，下文将统一使用`h`而不是`React.createElement`。下面将通过一个简单的例子来介绍一下增强 JSX 大致是如何做的。
 
-上面提到 Vue 也可以使用 JSX，但是由于 JSX 的灵活性，Vue 中的 JSX 所支持的有些特性在 React 中是不支持的。比如说，Vue 的 JSX 支持 class prop。相比起 React 中只能接受字符串的`className`，`class`支持更多的形式，比如数组、对象等等。当然 React 社区也有库能够实现类似的功能，比如`classnames`和`clsx`等，从而将开发者从拼接类名字符串的工作中解脱出来。但是，这也以为着写出来的标签会类似`<div className={clsx(["a", "b"])}></div>`。显然，相比起 Vue 中的实现，这样的代码稍微看上去稍微有一点乱，而且这也会导致我们需要在很多文件中都引入`clsx`库。之前也提到，JSX 支持什么样的特性是由`h`决定的，所以我们想要为 JSX 增加功能的话只需要增强`h`就可以了。不过，增强`h`比较 low level，是否值得这么做还是需要仔细衡量的。
+上面提到 Vue 也可以使用 JSX，但是由于 JSX 的灵活性，Vue 中的 JSX 所支持的有些特性在 React 中是不支持的。比如说，Vue 的 JSX 支持 class prop。相比起 React 中只能接受字符串的`className`，`class`支持更多的形式，比如数组、对象等等。当然 React 社区也有库能够实现类似的功能，比如`classnames`和`clsx`等，从而将开发者从拼接类名字符串的工作中解脱出来。但是，这也意味着写出来的标签会类似`<div className={clsx(["a", "b"])}></div>`。显然，相比起 Vue 中的实现，这样的代码稍微看上去稍微有一点乱，而且这也会导致我们需要在很多文件中都引入`clsx`库。之前也提到，JSX 支持什么样的特性是由`h`决定的，所以我们想要为 JSX 增加功能的话只需要增强`h`就可以了。不过，增强`h`比较 low level，是否值得这么做还是需要仔细衡量的。
 
 那接下来，我们就尝试来实现对`h`的增强。在开始之前，我们先来写几个测试。
 
@@ -64,11 +64,15 @@ const createElement = (type, props, ...children) => {
 ```js
 const className = clsx(props["className"], props["class"]);
 
-const newProps = { className }
+const newProps = { className };
 
 for (let key in props) {
-  if (hasOwnProperty.call(props, key) && key !== 'class' && key !== 'className') {
-    newProps[key] = props[key]
+  if (
+    hasOwnProperty.call(props, key) &&
+    key !== "class" &&
+    key !== "className"
+  ) {
+    newProps[key] = props[key];
   }
 }
 ```
@@ -124,7 +128,7 @@ React.createElement(
 
 > Replace the function used when compiling JSX expressions。
 
-而在 React Automatic Runtime下，这个 import 的过程将自动完成。观察在该 runtime 下生成的代码有什么不同：
+而在 React Automatic Runtime 下，这个 import 的过程将自动完成。观察在该 runtime 下生成的代码有什么不同：
 
 ```js
 "use strict";
@@ -134,7 +138,7 @@ var _jsxRuntime = require("react/jsx-runtime");
 /*#__PURE__*/
 (0, _jsxRuntime.jsx)("div", {
   className: "red",
-  children: "Hello World"
+  children: "Hello World",
 });
 ```
 
@@ -147,10 +151,13 @@ var _jsxRuntime = require("react/jsx-runtime");
 ```json
 {
   "presets": [
-    ["@babel/preset-react", {
-      "runtime": "automatic",
-      "importSource": "preact"
-    }]
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic",
+        "importSource": "preact"
+      }
+    ]
   ]
 }
 ```
@@ -161,7 +168,7 @@ var _jsxRuntime = require("react/jsx-runtime");
 
 ```js
 // jsx-runtime.js
-import { mergeClassProp, hasOwnProperty } from './utils';
+import { mergeClassProp, hasOwnProperty } from "./utils";
 import * as ReactJSXRuntime from "react/jsx-runtime";
 
 export function jsx(type, props, key) {
@@ -169,7 +176,7 @@ export function jsx(type, props, key) {
     return ReactJSXRuntime.jsx(type, props, key);
   }
 
-  const newProps = mergeClassProp(props)
+  const newProps = mergeClassProp(props);
 
   return ReactJSXRuntime.jsx(type, newProps, key);
 }
@@ -179,7 +186,7 @@ export function jsxs(type, props, key) {
     return ReactJSXRuntime.jsxs(type, props, key);
   }
 
-  const newProps = mergeClassProp(props)
+  const newProps = mergeClassProp(props);
 
   return ReactJSXRuntime.jsxs(type, newProps, key);
 }
@@ -187,13 +194,13 @@ export function jsxs(type, props, key) {
 
 ```js
 // jsx-dev-runtime.js
-import { mergeClassProp, hasOwnProperty } from './utils';
-import * as ReactJSXENVRuntime from 'react/jsx-dev-runtime';
+import { mergeClassProp, hasOwnProperty } from "./utils";
+import * as ReactJSXENVRuntime from "react/jsx-dev-runtime";
 
-export const Fragment = ReactJSXENVRuntime.Fragment
+export const Fragment = ReactJSXENVRuntime.Fragment;
 
-export function jsxDEV(type, props, key, isStaicChildren, source, self ) {
-  if (!hasOwnProperty.call(props, 'class')) {
+export function jsxDEV(type, props, key, isStaicChildren, source, self) {
+  if (!hasOwnProperty.call(props, "class")) {
     return ReactJSXENVRuntime.jsxDEV(
       type,
       props,
@@ -201,7 +208,7 @@ export function jsxDEV(type, props, key, isStaicChildren, source, self ) {
       isStaicChildren,
       source,
       self
-    )
+    );
   }
 
   const newProps = mergeClassProp(props);
@@ -214,12 +221,15 @@ export function jsxDEV(type, props, key, isStaicChildren, source, self ) {
 
 ```ts
 // 内容参考了 @emotion/react
-import 'react'
+import "react";
 
-import { ClassValue } from 'clsx';
+import { ClassValue } from "clsx";
 
-type WithConditionalClassProp<P> = 'className' extends keyof P
-  ? string extends P['className' & keyof P] ? { class?: ClassValue } : {} : {}
+type WithConditionalClassProp<P> = "className" extends keyof P
+  ? string extends P["className" & keyof P]
+    ? { class?: ClassValue }
+    : {}
+  : {};
 
 export namespace CustomJSX {
   interface Element extends JSX.Element {}
@@ -227,18 +237,19 @@ export namespace CustomJSX {
   interface ElementAttributesProperty extends JSX.ElementAttributesProperty {}
   interface ElementChildrenAttribute extends JSX.ElementChildrenAttribute {}
 
-  type LibraryManagedAttributes<C, P> = WithConditionalClassProp<P> &  JSX.LibraryManagedAttributes<C, P>;
+  type LibraryManagedAttributes<C, P> = WithConditionalClassProp<P> &
+    JSX.LibraryManagedAttributes<C, P>;
 
-  interface IntrinsicAttributes  extends JSX.IntrinsicAttributes {}
+  interface IntrinsicAttributes extends JSX.IntrinsicAttributes {}
 
   type IntrinsicElements = {
     [K in keyof JSX.IntrinsicElements]: JSX.IntrinsicElements[K] & {
       class?: ClassValue;
-    }
-  }
+    };
+  };
 }
 ```
 
 相比起 `@types/react` 提供的 JSX 定义，`CustomJSX` 对 `LibraryManagedAttributes` 和 `IntrinsicElements` 进行了增强，使组件能够接受 class prop。
 
-在对`babel`进行配置之后，我们就可以使用我们提供的 `jsx` 来创建element了。完整的代码已放到[GitHub](https://github.com/panchao5/react-class-prop.git)上。
+在对`babel`进行配置之后，我们就可以使用我们提供的 `jsx` 来创建 element 了。完整的代码已放到[GitHub](https://github.com/panchao5/react-class-prop.git)上。
