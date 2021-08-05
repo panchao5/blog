@@ -218,27 +218,34 @@ test("html supports v-show", () => {
 });
 // snapshot: exports[`html supports v-show 1`] = `"<div style=\\"display: none;\\">Hello World</div>"`;
 
-test("html suports custom directives", () => {
+test("suports custom directives", () => {
+
   /**
-   * @type Directive<any, string>
-   */
+    * @type Directive<any, string>
+    */
   const directive = {
     mounted(_, { value }) {
       console.log(`Hello ${value}`)
     }
-  } 
+  }
+
+  const spy = jest.spyOn(global.console, "log")
 
   const wrapper = mount(() => html`<div v-greeting="World">Hello World</div>`, {
     global: {
       directives: { 'greeting': directive }
     }
   });
+  expect(spy).toHaveBeenCalledWith("Hello World")
   expect(wrapper.html()).toMatchSnapshot();
+
+  spy.mockRestore();
 });
 
-// prints: Hello World
 // snapshot: exports[`html suports custom directives 1`] = `"<div>Hello World</div>"`;
 
 ```
+
+完整代码在[GitHub](https://github.com/panchao5/htm-vue-demo)。
 
 可以看到，我们能够很方便的对语法进行增强以方便使用，而且我们能够做的还有很多很多，比如增加对 global 注册的组件的支持，对 `v-model` 和 `v-if` 的支持等。和之前我们对 JSX 进行增强时一样，限制我们的只有想象力。
