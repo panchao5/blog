@@ -219,31 +219,29 @@ test("html supports v-show", () => {
 // snapshot: exports[`html supports v-show 1`] = `"<div style=\\"display: none;\\">Hello World</div>"`;
 
 test("suports custom directives", () => {
-
   /**
-    * @type Directive<any, string>
-    */
+   * @type Directive<any, string>
+   */
   const directive = {
     mounted(_, { value }) {
-      console.log(`Hello ${value}`)
-    }
-  }
+      console.log(`Hello ${value}`);
+    },
+  };
 
-  const spy = jest.spyOn(global.console, "log")
+  const spy = jest.spyOn(global.console, "log");
 
   const wrapper = mount(() => html`<div v-greeting="World">Hello World</div>`, {
     global: {
-      directives: { 'greeting': directive }
-    }
+      directives: { greeting: directive },
+    },
   });
-  expect(spy).toHaveBeenCalledWith("Hello World")
+  expect(spy).toHaveBeenCalledWith("Hello World");
   expect(wrapper.html()).toMatchSnapshot();
 
   spy.mockRestore();
 });
 
 // snapshot: exports[`html suports custom directives 1`] = `"<div>Hello World</div>"`;
-
 ```
 
 完整代码在[GitHub](https://github.com/panchao5/htm-vue-demo)。
