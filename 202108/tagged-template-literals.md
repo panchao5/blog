@@ -125,4 +125,4 @@ md.render(`\# Hello *World*`); // "<h1>Hello <em>World</em></h1>\n"
 
 注：`\` 在 markdown 中也有转义的作用。
 
-在 `mark` 版本中，转义字符正确的起作用，防止了 `#` 被当成 Heading 的起始字符。而在 `md.render` 中，`\` 却没有起作用。这是因为 `\` 在 template literals 中也担任转义字符的作用。而对于 template literals， `\#` 就是 `#`。所以 `md.render` 拿到的字符串实际上就是`# Hello *World*`。要让 `\` 正确的在 markdown 语法中起效，我们需要对 `\` 进行转义，也就是传入 `\\# Hello *World*`。这样，`md.render` 的返回值就和 `mark` 版本一样了。这就像必须使用 `new RegExp("\\\\")` 才能匹配包含 `\` 的字符串。
+在 `mark` 版本中，转义字符正确的起作用，防止了 `#` 被当成 Heading 的起始字符。而在 `md.render` 中，`\` 却没有起作用。这是因为 `\` 在 template literals 中也担任转义字符的作用。而对于 template literals， `\#` 就是 `#`。所以 `md.render` 拿到的字符串实际上就是`# Hello *World*`。要让 `\` 正确的在 markdown 语法中起效，我们需要对 `\` 进行转义，也就是传入 `\\# Hello *World*`。这样，`md.render` 的返回值就和 `mark` 版本一样了。这就像必须使用 `new RegExp("\\\\")` 才能匹配包含 `\` 的字符串。`mark` 的完整代码在 [GitHub](https://github.com/panchao5/markmark)。
